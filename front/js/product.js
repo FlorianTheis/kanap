@@ -16,10 +16,7 @@ function infosProduct() {
     .then(function (Produits) {
       console.log(Produits);
       imageHTML(Produits);
-    })
-    .then(function (colorsss) {
-      console.log(colorsss);
-      lesCouleurs(colorsss);
+      lesCouleurs(Produits.colors);
     });
 }
 
@@ -38,22 +35,20 @@ const imageHTML = function (Produits) {
   let titre = document.querySelector('#title'); //variable qui va nous servir à récuperer le titre "#title pour l'id"
   let prix = document.querySelector('#price'); // pareil qu'au dessus
   let description = document.querySelector('#description'); // pareil
-  let couleur = document.querySelector('#colors');
 
   titre.textContent = Produits.name; // récupérer le titre
   prix.textContent = Produits.price; // le prix
   description.textContent = Produits.description;
-  
 };
 
 // fonction afficher choix couleur
-let choiceCouleur = document.getElementById('colors');
+// variable choiceCouleur (récupérer ID colors, le parent de l'élément option)
 const lesCouleurs = function (colorsss) {
+  let choiceCouleur = document.getElementById('colors');
   for (let choix of colorsss) {
-    let optionsCouleurs = document.createElement('option');
-    optionsCouleurs.textContent = value.colors;
-    optionsCouleurs.textContent = `${choix.colors}`;
-    choiceCouleur.appendChild(optionsCouleurs);
+    let optionsCouleurs = document.createElement('option'); // création de la parti option (l'enfant)
+    optionsCouleurs.textContent = `${choix}`;
+    choiceCouleur.appendChild(optionsCouleurs); // rattaché option (optionsCouleurs) à son parent (l'id colors "choiceCouleur")
+    console.log(optionsCouleurs);
   }
 };
-

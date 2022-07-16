@@ -35,7 +35,7 @@ function Kanap(lesProduits) {
     let newElement = document.createElement('a');
     newElement.href = `./product.html?id=${elements._id}`;
 
-    lesArticles.appendChild(newElement); // a rattaché au parent (la section avec id items (voir ligne 27))
+    lesArticles.appendChild(newElement); // a rattaché au parent (la section avec id items (voir ligne 29))
 
     let baliseArticle = document.createElement('article'); // creation balise Article avec img, description et le nom d'un kanapé (article étant leur parent)
 

@@ -1,10 +1,11 @@
 let productLocalStorage = JSON.parse(localStorage.getItem('cart')); // On recupere ce qu'il y a dans le local storage.
 console.log(productLocalStorage);
 
-function getBasket() {
+function getBasket(selectKanaps) {
   // Recuperation de l'item cart.
   let productLocalStorage = localStorage.getItem('cart');
   // Creation d'un tableau si le panier est vide.
+
   if (productLocalStorage == null) {
     return [];
   } else {
@@ -12,31 +13,43 @@ function getBasket() {
   }
 }
 
-function getKanaps() {
-  fetch(`http://localhost:3000/api/products/`) // ajout de l'URL
-    .then(function (res) {
-      console.log(res);
-      // récupération des données au format JSON avec vérification que la requete s'est bien passé (res.ok)
-      if (res.ok) {
-        return res.json();
-      }
-    })
-    .then(function (lesProduits) {
-      console.log(lesProduits);
-      getCart(lesProduits); // fonction elements du dom
-      getTotalsProduct(lesProduits); // fonction du nombre total de produits dans le panier
-      getTotalsPrice(lesProduits); // fonction du prix total dans le panier 
-      modifQuantity(lesProduits); // fonction pour modifier la quantité d'un produit 
-      deleteArticle(lesProduits); // fonction pour supprimer un produit
+async function getKanaps() {
+  const selectKanaps = await Promise.all(
+    productLocalStorage.map((kanap) =>
+      fetch(`http://localhost:3000/api/products/${kanap.id}`).then(function (
+        res
+      ) {
+        //récupération des données au format JSON après vérification que la requête s'est bien passée (res.ok)
+        if (res.ok) {
+          return res.json();
+        }
+      })
+    )
+  ); // ajout de l'url
+  let allProducts = []; // tableau avec toutes les infos
+
+  for (let p of productLocalStorage) {
+    const kanaps = selectKanaps.find((k) => k._id === p.id);
+
+    allProducts.push({
+      ...kanaps,
+      ...p,
     });
+  }
+  console.log('allProducts', allProducts);
+  getCart(selectKanaps); // fonction élément du dom
+  getTotalsProduct(selectKanaps); // fonction du nombre total de produits dans le panier
+  getTotalsPrice(selectKanaps); // fonction du prix total dans le panier
+  modifQuantiy(selectKanaps); // fonction pour modifier la quantité d'un produits
+  deleteArtcle(selectKanaps); // fonction pour supprimer un produit
 }
 getKanaps(); // appel de la fonction
 
 //---------------------------------------------------------------- AJOUT DES ELEMENTS DU DOM -------------------------------------------------------------------------//
 
-const getCart = function (lesProduits) {
+const getCart = function (selectKanaps) {
   for (let product in productLocalStorage) {
-    const currentProduct = lesProduits.find(
+    const currentProduct = selectKanaps.find(
       // trouver le bon produit actuel
       (p) => p._id === productLocalStorage[product].id // condition p id === productLocalStorage[product].id
     );
@@ -125,7 +138,7 @@ const getCart = function (lesProduits) {
 
 //---------------------------------------------------------FONCTION TOTAL DES PRODUITS DANS LE PANIER-----------------------------------------------------------//
 
-const getTotalsProduct = function (lesProduits) {
+function getTotalsProduct(selectKanaps) {
   //déclaration variable total quantité des produits
   let totalQuantity = 0;
   //boucle pour calcul de la quantité total (for let of)
@@ -135,25 +148,27 @@ const getTotalsProduct = function (lesProduits) {
   }
   // modification du dom
   document.getElementById('totalQuantity').textContent = totalQuantity;
-};
-getTotalsProduct(); // appel de la fonction total des produits
+  getTotalsPrice(selectKanaps);
+}
+// appel de la fonction total des produits
 
 //-----------------------------------------------------------FONCTION TOTAL DU PRIX DANS LE PANIER--------------------------------------------------------------//
 
-const getTotalsPrice = function (lesProduits) {
-let totalPrice = 0;
-//boucle pour calcul du prix total (for let of)
-for (let totalProduct of productLocalStorage) {
-  let productCart = totalProduct.price;
-  totalPrice += productCart;
+function getTotalsPrice(selectKanaps) {
+  let totalPrice = 0;
+  //boucle pour calcul du prix total (for let of)
+  for (let totalProduct of productLocalStorage) {
+    let productCart = selectKanaps.find((p) => p._id === totalProduct.id);
+
+    totalPrice += productCart.price * totalProduct.quantity;
+  }
+  // kanaps._id dans all product
+  //modification du dom
+  document.getElementById('totalPrice').textContent = totalPrice;
 }
-//modification du dom
-document.getElementById('totalPrice').textContent = totalPrice;
-};
-getTotalsPrice(); // appel de la fonction
 
 //------------------------------------------------------FONCTION POUR MODIFIER LA QUANTITE D'UN PRODUIT DU PANIER--------------------------------------------------//
-const modifQuantity = function (lesProduits) {
+function modifQuantiy(selectKanaps) {
   let itemModif = document.querySelectorAll('.itemQuantity');
   for (let j = 0; j < itemModif.length; j++) {
     itemModif[j].addEventListener('change', (event) => {
@@ -174,13 +189,14 @@ const modifQuantity = function (lesProduits) {
       location.reload(); // rafraichir la page
       alert('votre panier est mis à jour.');
     }); //fin du addeventlistener
+    
   }
-};
+  
+}
 
 //---------------------------------------------------FONCTION POUR SUPPRIMER UN PRODUIT DU PANIER-----------------------------------------------------------------//
 
-
-const deleteArticle = function (lesProduits) {
+function deleteArtcle(selectKanaps) {
   let deleteItem = document.querySelectorAll('.deleteItem');
 
   for (let k = 0; k < deleteItem.length; k++) {
@@ -200,6 +216,142 @@ const deleteArticle = function (lesProduits) {
       alert('Votre article a bien été supprimé du panier.');
     }); //fin du addEventListener
   }
-};
+}
 
-//--------------------------------------------------------------
+//-------------------------------------------------------------- FORMULAIRE -------------------------------------------------------------------------------------------//
+
+let submit = document.getElementById('order'); // commander
+
+let inputFirstName = document.getElementById('firstName'); // prenoms
+let inputLastName = document.getElementById('lastName'); // noms
+let inputAddress = document.getElementById('address'); // adresse
+let inputCity = document.getElementById('city'); // ville
+let inputMail = document.getElementById('email'); // adresse mail
+
+// -------------------REGEX-------------------------------------//
+
+let testNumber = /^[a-zA-Z-\s]{3,}#*$/; // s valide les espace blancs (utilisé pour noms et prénom) et 3 minimum
+let testAddress = /^[a-zA-Z-0-9\s]{3,50}#*$/; // pour l'adresse 3 et 50 caractères autorisé et chiffre autorisés
+let regexMail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{3,4})+$/; // pour le mail 3 et 4 caratères autorisés apres le point ".com", le @ doit etre inscrit
+// \w est l'équivalent de [a-zA-Z0-9] ($ est la fin de la séquence et ^ début de séquence)
+
+// testNumber pour prénom / nom / city
+// testAddress pour l'adresse du client
+// regexMail pour l'adresse Mail du client
+
+function verificationChamps(e) {
+  let verification = true;
+  if (!testNumber.test(inputFirstName.value) || inputFirstName.value == '') {
+    // si le champ est mal renseigné , renvoyez "le champ ne doit pas contenir..." sinon
+    document.getElementById('firstNameErrorMsg').innerHTML = //  si il est bien renseigné , vérification ok renvoyé true
+      'le champ ne doit pas contenir de chiffre et doit être renseigné avec minimum 3 caractères.';
+    document.getElementById('firstNameErrorMsg').style.color = 'red';
+    e.preventDefault();
+    verification = verification && false;
+  } else {
+    document.getElementById('firstNameErrorMsg').innerHTML = '';
+    verification = verification && true;
+  }
+  if (!testNumber.test(inputLastName.value) || inputLastName.value == '') {
+    document.getElementById('lastNameErrorMsg').innerHTML =
+      'le champ ne doit pas contenir de chiffre et doit etre renseigné avec minimum 3 caractères.';
+    document.getElementById('lastNameErrorMsg').style.color = 'red';
+    e.preventDefault();
+    verification = verification && false;
+  } else {
+    document.getElementById('lastNameErrorMsg').innerHTML = '';
+    verification = verification && true;
+  }
+  if (!testAddress.test(inputAddress.value) || inputAddress.value == '') {
+    document.getElementById('addressErrorMsg').innerHTML =
+      'le champ doit contnir une adresse valide avec au minimum 3 caractères. ';
+    document.getElementById('addressErrorMsg').style.color = 'red';
+    e.preventDefault();
+    verification = verification && false;
+  } else {
+    document.getElementById('addressErrorMsg').innerHTML = '';
+    verification = verification && true;
+  }
+  if (!testNumber.test(inputCity.value) || inputCity.value == '') {
+    document.getElementById('cityErrorMsg').innerHTML =
+      'le champ ne doit pas contenir de chiffre et être renseigner avec minimum 3 caractères.';
+    document.getElementById('cityErrorMsg').style.color = 'red';
+    e.preventDefault();
+    verification = verification && false;
+  } else {
+    document.getElementById('cityErrorMsg').innerHTML = '';
+    verification = verification && true;
+  }
+  if (!regexMail.test(inputMail.value) || inputMail.value == '') {
+    document.getElementById('emailErrorMsg').innerHTML =
+      'le champ doit contenir mail valide (exemple machin@machin.com)';
+    document.getElementById('emailErrorMsg').style.color = 'red';
+    e.preventDefault();
+    verification = verification && false;
+  } else {
+    document.getElementById('emailErrorMsg').innerHTML = '';
+    verification = verification && true;
+  }
+  retourneForm(e, verification); // déclaration de la fonction qui comporte le body (firstName...)
+}
+
+submit.addEventListener('click', (e) => verificationChamps(e));
+
+//---------------POST_Order---------------
+
+let formData = document.querySelector('form').elements; // on recupère les elements form
+for (let i = 0; i < formData.length; i++) {
+  // on incrémente
+  const element = formData[i];
+}
+let storage = productLocalStorage;
+
+
+// if storage est vide (=0) alors la commande ne se valide pas sinon si produit présent dans le panier la commande se valide (si le formulaire est bien rempli)
+function postOrder(body) {
+  if (storage.length === 0) {
+    alert("votre panier est vide, veuillez ajoutez un article")
+  } else {
+    fetch('http://localhost:3000/api/products/order', {
+    method: 'POST',
+    body: JSON.stringify(body),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      console.log(data.orderId);
+      localStorage.setItem('orderId', data.orderId);
+      document.location.href = 'confirmation.html';
+    });
+  }
+  
+}
+
+function retourneForm(e, verification) {
+  console.log(verification);
+  if (!verification) {
+    e.preventDefault();
+  } else {
+    const body = {
+      contact: {
+        firstName: formData[0].value,
+        lastName: formData[1].value,
+        address: formData[2].value,
+        city: formData[3].value,
+        email: formData[4].value,
+      },
+      products: recupeId(storage),
+    };
+    postOrder(body); // déclaration de la fonction qui contient le POST et le FETCH
+  }
+}
+function recupeId(storage) {
+  let idTableau = [];
+  for (let i = 0; i < storage.length; i++) {
+    idTableau.push(storage[i].id);
+  }
+  console.log(idTableau);
+  return idTableau;
+}

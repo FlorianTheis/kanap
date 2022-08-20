@@ -39,7 +39,7 @@ async function getKanaps() {
   console.log('allProducts', allProducts);
   getCart(selectKanaps); // fonction élément du dom
   getTotalsProduct(selectKanaps); // fonction du nombre total de produits dans le panier
-  getTotalsPrice(selectKanaps); // fonction du prix total dans le panier
+  getTotalsPrice(allProducts); // fonction du prix total dans le panier
   modifQuantiy(selectKanaps); // fonction pour modifier la quantité d'un produits
   deleteArtcle(selectKanaps); // fonction pour supprimer un produit
 }
@@ -48,7 +48,7 @@ getKanaps(); // appel de la fonction
 //---------------------------------------------------------------- AJOUT DES ELEMENTS DU DOM -------------------------------------------------------------------------//
 
 const getCart = function (selectKanaps) {
-  for (let product in productLocalStorage) {
+  for (let product in selectKanaps) {
     const currentProduct = selectKanaps.find(
       // trouver le bon produit actuel
       (p) => p._id === productLocalStorage[product].id // condition p id === productLocalStorage[product].id
@@ -157,10 +157,10 @@ function getTotalsProduct(selectKanaps) {
 function getTotalsPrice(selectKanaps) {
   let totalPrice = 0;
   //boucle pour calcul du prix total (for let of)
-  for (let totalProduct of productLocalStorage) {
-    let productCart = selectKanaps.find((p) => p._id === totalProduct.id);
+  for (let totalProduct of selectKanaps) {
+    console.log('totalProduct', totalProduct);
 
-    totalPrice += productCart.price * totalProduct.quantity;
+    totalPrice += totalProduct.price * totalProduct.quantity;
   }
   // kanaps._id dans all product
   //modification du dom
@@ -189,9 +189,7 @@ function modifQuantiy(selectKanaps) {
       location.reload(); // rafraichir la page
       alert('votre panier est mis à jour.');
     }); //fin du addeventlistener
-    
   }
-  
 }
 
 //---------------------------------------------------FONCTION POUR SUPPRIMER UN PRODUIT DU PANIER-----------------------------------------------------------------//
@@ -232,7 +230,7 @@ let inputMail = document.getElementById('email'); // adresse mail
 
 let testNumber = /^[a-zA-Z-\s]{3,}#*$/; // s valide les espace blancs (utilisé pour noms et prénom) et 3 minimum
 let testAddress = /^[a-zA-Z-0-9\s]{3,50}#*$/; // pour l'adresse 3 et 50 caractères autorisé et chiffre autorisés
-let regexMail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{3,4})+$/; // pour le mail 3 et 4 caratères autorisés apres le point ".com", le @ doit etre inscrit
+let regexMail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,4})+$/; // pour le mail entre 2 et 4 caratères autorisés apres le point ".com", le @ doit etre inscrit
 // \w est l'équivalent de [a-zA-Z0-9] ($ est la fin de la séquence et ^ début de séquence)
 
 // testNumber pour prénom / nom / city
@@ -243,12 +241,13 @@ function verificationChamps(e) {
   let verification = true;
   if (!testNumber.test(inputFirstName.value) || inputFirstName.value == '') {
     // si le champ est mal renseigné , renvoyez "le champ ne doit pas contenir..." sinon
-    document.getElementById('firstNameErrorMsg').innerHTML = //  si il est bien renseigné , vérification ok renvoyé true
+    document.getElementById('firstNameErrorMsg').innerHTML =
       'le champ ne doit pas contenir de chiffre et doit être renseigné avec minimum 3 caractères.';
     document.getElementById('firstNameErrorMsg').style.color = 'red';
     e.preventDefault();
     verification = verification && false;
   } else {
+    //  si il est bien renseigné , vérification ok renvoyé true
     document.getElementById('firstNameErrorMsg').innerHTML = '';
     verification = verification && true;
   }
@@ -306,27 +305,25 @@ for (let i = 0; i < formData.length; i++) {
 }
 let storage = productLocalStorage;
 
-
 // if storage est vide (=0) alors la commande ne se valide pas sinon si produit présent dans le panier la commande se valide (si le formulaire est bien rempli)
 function postOrder(body) {
   if (storage.length === 0) {
-    alert("votre panier est vide, veuillez ajoutez un article")
+    alert('votre panier est vide, veuillez ajoutez un article');
   } else {
     fetch('http://localhost:3000/api/products/order', {
-    method: 'POST',
-    body: JSON.stringify(body),
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      console.log(data.orderId);
-      localStorage.setItem('orderId', data.orderId);
-      document.location.href = 'confirmation.html';
-    });
+      method: 'POST',
+      body: JSON.stringify(body),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data.orderId);
+        localStorage.setItem('orderId', data.orderId);
+        document.location.href = 'confirmation.html';
+      });
   }
-  
 }
 
 function retourneForm(e, verification) {

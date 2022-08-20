@@ -70,9 +70,3 @@ function Kanap(lesProduits) {
 // elements (etiquette pour nommer les différents indice qui sont dans "lesProduits")
 // lesProduits (là ou se trouvent les différents indice à récuperer, (function Kanap) )
 // récuperer ID ${elements._id}
-
-// le principe à était avec la fonction Kanap(lesproduits) de faire une boucle FOR LET OF , de récupérer l'ID de la section donc Items, créee les élements avec .createElement
-// (lien a, balise article, image, titre h3 et description) et les appelé/rattaché a leur parent respectif avec appendChild (la balise article pour img, h3 et p)
-// et pour le lien "a" le parent c'est l'id de la section items.
-// et les produits sont bien affiché sur la page accueil
-

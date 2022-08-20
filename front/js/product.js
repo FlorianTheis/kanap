@@ -71,6 +71,7 @@ function getCart() {
 
 function addToCart(productChoice) {
   // fonction ajouté au panier
+  // si le produit c'est le même ID et meme couleur ajouté sur une ligne dans le local storage, additioné les quantités si plusieurs même produit
   let cart = getCart();
   for (let i in cart) {
     const ProPro = cart[i];
@@ -106,9 +107,9 @@ buttonCart.addEventListener('click', () => {
   // Condition de check si les fonctions de quantite et de couleur fonctionne bien.
   if (quantityVerif() && colorVerif()) {
     console.log('La commande à été passée !');
-    addToCart(productChoice);
+    addToCart(productChoice); //declaration de la fonction addToCart pour afficher le localStorage quand on va "ajouter au panier"
   }
-  console.log(productChoice); //declaration de la fonction addToCart pour afficher le localStorage quand on va "ajouter au panier"
+  console.log(productChoice);
 });
 
 // Fonction pour verifier si la couleur est bien selectionne.

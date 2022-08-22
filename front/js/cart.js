@@ -173,6 +173,17 @@ function modifQuantiy(selectKanaps) {
   for (let j = 0; j < itemModif.length; j++) {
     itemModif[j].addEventListener('change', (event) => {
       event.preventDefault();
+      if (itemModif[j].value <= 0) {
+        
+        alert ("Veuillez saisir une quantité minimale d'un article par produit")
+        itemModif[j].value = result;
+        location.reload();
+      }
+      if (itemModif[j].value > 100) {
+        alert("veuillez choisir une quantité maximale de 100 articles par produit")
+        itemModif[j].value = 101;
+      }
+      else {
       //Je selectionne l'élément à modifier selon son Id et sa couleur
       let itemNew = productLocalStorage[j].quantity;
       let itemModifValue = itemModif[j].valueAsNumber;
@@ -188,6 +199,8 @@ function modifQuantiy(selectKanaps) {
 
       location.reload(); // rafraichir la page
       alert('votre panier est mis à jour.');
+      };
+      
     }); //fin du addeventlistener
   }
 }

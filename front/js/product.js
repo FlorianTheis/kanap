@@ -14,7 +14,7 @@ function infosProduct() {
       }
     })
     .then(function (Produits) {
-      console.log(Produits);
+      
       imageHTML(Produits);
       lesCouleurs(Produits.colors);
     });
@@ -29,7 +29,7 @@ const imageHTML = function (Produits) {
   imageBloc.setAttribute('src', Produits.imageUrl);
   imageBloc.setAttribute('alt', Produits.altTxt);
   lesArticles.appendChild(imageBloc); // imageBloc(l'image) rattaché à son parent la class (item__img) donc la variable lesArticles
-  console.log(imageBloc);
+  
 
   // déclaration des variables pour récuperer titre, prix, description
   let titre = document.querySelector('#title'); //variable qui va nous servir à récuperer le titre "#title pour l'id"
@@ -106,10 +106,10 @@ buttonCart.addEventListener('click', () => {
   };
   // Condition de check si les fonctions de quantite et de couleur fonctionne bien.
   if (quantityVerif() && colorVerif()) {
-    console.log('La commande à été passée !');
+    
     addToCart(productChoice); //declaration de la fonction addToCart pour afficher le localStorage quand on va "ajouter au panier"
   }
-  console.log(productChoice);
+
 });
 
 // Fonction pour verifier si la couleur est bien selectionne.
@@ -117,7 +117,7 @@ buttonCart.addEventListener('click', () => {
 function colorVerif() {
   // Recuperer la valeur des couleurs saisie par l'utilisateur.
   let colorCheck = document.getElementById('colors').value;
-  console.log(colorCheck);
+  
   // Si la couleur contient plus de 0 caracteres donc si elle à bien été choisi.
   if (colorCheck > [0]) {
     console.log('Couleur ok');
@@ -133,10 +133,10 @@ function colorVerif() {
 function quantityVerif() {
   // Recuperer la valeur de la quantite saisie par l'utilisateur.
   let quantityCheck = document.getElementById('quantity').value;
-  console.log(quantityCheck);
+  
   // Si la quantite saisie se trouve entre 1 et 100.
   if (quantityCheck > 0 && quantityCheck < 100) {
-    console.log('Quantité ok');
+    
     // Valider la commande.
     return true;
     // Sinon ne pas valider et afficher un message d'erreur.

@@ -1,7 +1,7 @@
 let productLocalStorage = JSON.parse(localStorage.getItem('cart')); // On recupere ce qu'il y a dans le local storage.
-console.log(productLocalStorage);
 
-function getBasket(selectKanaps) {
+
+function getBasket() {
   // Recuperation de l'item cart.
   let productLocalStorage = localStorage.getItem('cart');
   // Creation d'un tableau si le panier est vide.
@@ -15,6 +15,7 @@ function getBasket(selectKanaps) {
 
 async function getKanaps() {
   const selectKanaps = await Promise.all(
+
     productLocalStorage.map((kanap) =>
       fetch(`http://localhost:3000/api/products/${kanap.id}`).then(function (
         res
@@ -42,8 +43,14 @@ async function getKanaps() {
   getTotalsPrice(allProducts); // fonction du prix total dans le panier
   modifQuantiy(selectKanaps); // fonction pour modifier la quantité d'un produits
   deleteArtcle(selectKanaps); // fonction pour supprimer un produit
+  
+    
+  
 }
-getKanaps(); // appel de la fonction
+if (productLocalStorage == null) {
+  alert("Votre panier est vide veuillez ajouter un article");
+} 
+getKanaps();
 
 //---------------------------------------------------------------- AJOUT DES ELEMENTS DU DOM -------------------------------------------------------------------------//
 
@@ -158,7 +165,7 @@ function getTotalsPrice(selectKanaps) {
   let totalPrice = 0;
   //boucle pour calcul du prix total (for let of)
   for (let totalProduct of selectKanaps) {
-    console.log('totalProduct', totalProduct);
+    
 
     totalPrice += totalProduct.price * totalProduct.quantity;
   }
@@ -197,8 +204,8 @@ function modifQuantiy(selectKanaps) {
 
       localStorage.setItem('cart', JSON.stringify(productLocalStorage));
 
-      location.reload(); // rafraichir la page
-      alert('votre panier est mis à jour.');
+    location.reload();
+      
       };
       
     }); //fin du addeventlistener
@@ -318,9 +325,10 @@ for (let i = 0; i < formData.length; i++) {
 }
 let storage = productLocalStorage;
 
+
 // if storage est vide (=0) alors la commande ne se valide pas sinon si produit présent dans le panier la commande se valide (si le formulaire est bien rempli)
 function postOrder(body) {
-  if (storage.length === 0) {
+  if (storage === null) {
     alert('votre panier est vide, veuillez ajoutez un article');
   } else {
     fetch('http://localhost:3000/api/products/order', {

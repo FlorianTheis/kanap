@@ -55,8 +55,9 @@ async function getKanaps() {
 }
 if (productLocalStorage == null) {
   alert("Votre panier est vide veuillez ajouter un article");
-} 
+} else {
 getKanaps();
+};
 
 //---------------------------------------------------------------- AJOUT DES ELEMENTS DU DOM -------------------------------------------------------------------------//
 

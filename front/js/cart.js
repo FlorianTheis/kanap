@@ -24,7 +24,13 @@ async function getKanaps() {
         if (res.ok) {
           return res.json();
         }
+        
       })
+      .catch(function (err) {
+        alert("Une erreur est survenue, veuillez réessayer"); }
+        )
+
+      
     )
   ); // ajout de l'url
   let allProducts = []; // tableau avec toutes les infos
@@ -44,7 +50,7 @@ async function getKanaps() {
   modifQuantiy(selectKanaps); // fonction pour modifier la quantité d'un produits
   deleteArtcle(selectKanaps); // fonction pour supprimer un produit
   
-    
+  
   
 }
 if (productLocalStorage == null) {
